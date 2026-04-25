@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>卫戍协议分队抽取</title>
+    <style>
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #2c2c2c; color: white; font-family: sans-serif; margin: 0; }
+        #resultBox { font-size: 3rem; font-weight: bold; margin-bottom: 2rem; width: 80%; text-align: center; padding: 2rem 0; background: #444; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        button { padding: 15px 40px; font-size: 1.5rem; background-color: #009688; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        button:active { background-color: #00796b; }
+        .tips { margin-top: 20px; font-size: 0.9rem; color: #aaa; }
+    </style>
+</head>
+<body>
+
+    <div id="resultBox">等待抽取</div>
+    <button id="drawBtn">点击抽取</button>
+    <div class="tips">也可以摇动手机抽取哦！</div>
+
+    <script>
+        // 词条池，这里可以替换成你想要的卫戍协议词条
+        const traits = ["炎", "维多利亚", "不屈", "卡西米尔", "深海", "哥伦比亚", "莱塔尼亚", "叙拉古", "伊比利亚", "萨卡兹"];
+        
+        let isRolling = false;
+        const resultBox = document.getElementById('resultBox');
+        const drawBtn = document.getElementById('drawBtn');
+
+        // 核心抽取函数
+        function startRoll() {
+            if (isRolling) return; // 防止重复点击
+            isRolling = true;
+            
+            let rollCount = 0;
+            const maxRolls = 20; // 滚动次数
+            
+            // 播放滚动动画
+            const rollInterval = setInterval(() => {
+                const randomTrait = traits[Math.floor(Math.random() * traits.length)];
+                resultBox.innerText = randomTrait;
+                rollCount++;
+                
+                if (rollCount >= maxRolls) {
+                    clearInterval(rollInterval);
+                    // 最终结果
+                    const finalTrait = traits[Math.floor(Math.random() * traits.length)];
+                    resultBox.innerText = finalTrait;
+                    resultBox.style.color = "#00F2AF"; // 结果变青色
+                    isRolling = false;
+                } else {
+                    resultBox.style.color = "white"; // 滚动时保持白色
+                }
+            }, 50); // 每50毫秒变一次
+        }
+
+        // 绑定点击事件
+        drawBtn.addEventListener('click', () => {
+            requestDeviceMotionPermission(); // 尝试获取摇一摇权限（针对iOS）
+            startRoll();
+        });
+
+        // 摇一摇功能检测
+        const SHAKE_THRESHOLD = 15; // 摇晃灵敏度阈值
+        let lastX = 0, lastY = 0, lastZ = 0;
+
+        function deviceMotionHandler(eventData) {
+            const acceleration = eventData.accelerationIncludingGravity;
+            if (!acceleration) return;
+
+            const deltaX = Math.abs(acceleration.x - lastX);
+            const deltaY = Math.abs(acceleration.y - lastY);
+            const deltaZ = Math.abs(acceleration.z - lastZ);
+
+            if (deltaX > SHAKE_THRESHOLD || deltaY > SHAKE_THRESHOLD || deltaZ > SHAKE_THRESHOLD) {
+                startRoll();
+            }
+
+            lastX = acceleration.x;
+            lastY = acceleration.y;
+            lastZ = acceleration.z;
+        }
+
+        // 处理 iOS 13+ 摇一摇权限问题
+        function requestDeviceMotionPermission() {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            window.addEventListener('devicemotion', deviceMotionHandler, false);
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // 非 iOS 13+ 设备直接监听
+                window.addEventListener('devicemotion', deviceMotionHandler, false);
+            }
+        }
+    </script>
+</body>
+</html>
