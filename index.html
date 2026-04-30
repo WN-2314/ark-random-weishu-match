@@ -3,98 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>卫戍协议分队抽取</title>
+    <title>盟约扭蛋机</title>
     <style>
-        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #2c2c2c; color: white; font-family: sans-serif; margin: 0; }
-        #resultBox { font-size: 3rem; font-weight: bold; margin-bottom: 2rem; width: 80%; text-align: center; padding: 2rem 0; background: #444; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        button { padding: 15px 40px; font-size: 1.5rem; background-color: #009688; color: white; border: none; border-radius: 8px; cursor: pointer; }
-        button:active { background-color: #00796b; }
-        .tips { margin-top: 20px; font-size: 0.9rem; color: #aaa; }
+        body { 
+            display: flex; flex-direction: column; align-items: center; 
+            background-color: #171717; color: white; font-family: "Microsoft YaHei", sans-serif; 
+            margin: 0; padding: 20px; min-height: 100vh; box-sizing: border-box;
+        }
+        
+        #typeHeader {
+            height: 80px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.4s ease;
+        }
+
+        #iconWrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        #topTypeIcon {
+            width: 80px; height: 80px; object-fit: contain; 
+            border-radius: 50%; 
+            box-shadow: 0 0 15px rgba(0, 242, 175, 0.4); 
+            display: block; 
+        }
+
+        #badge999 {
+            position: absolute;
+            bottom: -5px; 
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 500; 
+            letter-spacing: 1px;
+            text-shadow: 0 0 4px #000, 0 2px 4px #000; 
+            opacity: 0; 
+            transition: opacity 0.4s ease;
+            pointer-events: none; 
+        }
+
+        .main-display {
+            display: flex; flex-direction: column; align-items: flex-start; 
+            width: 90%; max-width: 400px; position: relative;
+        }
+
+        .label-top { font-size: 1.8rem; margin-bottom: 10px; font-weight: bold; }
+
+        .result-row {
+            display: flex; flex-direction: row; align-items: center; justify-content: space-between;
+            width: 100%;
+        }
+
+        #resultBox { 
+            font-size: 2.2rem; padding: 25px 20px; flex-grow: 1; 
+            background: #3d3d3d; border-radius: 15px; border: 1px solid #555;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4); 
+            color: white; text-align: center; font-weight: bold;
+        }
+
+        .label-right { 
+            font-size: 1.8rem; font-weight: bold; margin-left: 15px; white-space: nowrap; 
+        }
+
+        .action-area { margin-top: 35px; text-align: center; }
+        button { 
+            padding: 15px 60px; font-size: 1.5rem; background-color: #009688; 
+            color: white; border: none; border-radius: 8px; cursor: pointer; 
+        }
+        .tips { margin-top: 15px; font-size: 0.9rem; color: #888; }
+
+        #bottomSection {
+            display: flex; flex-direction: row; align-items: center; 
+            width: 90%; max-width: 400px; margin-top: 40px;
+            opacity: 0; transition: opacity 0.5s ease;
+        }
+        #memeImage { width: 100px; height: 100px; background-color: #444; border-radius: 8px; object-fit: cover; }
+        #descText { flex: 1; margin-left: 15px; font-size: 0.95rem; color: #ccc; line-height: 1.4; }
     </style>
 </head>
 <body>
 
-    <div id="resultBox">等待抽取</div>
-    <button id="drawBtn">点击抽取</button>
-    <div class="tips">也可以摇动手机抽取哦！</div>
+    <div id="typeHeader">
+        <div id="iconWrapper">
+            <img id="topTypeIcon" src="./default_icon.png" alt="类别图标">
+            <div id="badge999">999</div>
+        </div>
+    </div>
+
+    <div class="main-display">
+        <div class="label-top">你是一名：</div>
+        <div class="result-row">
+            <div id="resultBox">等待抽取</div>
+            <div class="label-right">玩家</div>
+        </div>
+    </div>
+
+    <div class="action-area">
+        <button id="drawBtn">点击抽取</button>
+        <div class="tips">正在连接神经网络...</div>
+    </div>
+
+    <div id="bottomSection">
+        <img id="memeImage" src="./default_meme.jpg" alt="梗图">
+        <div id="descText"></div>
+    </div>
 
     <script>
-        // 词条池，这里可以替换成你想要的卫戍协议词条
-        const traits = ["炎", "维多利亚", "不屈", "卡西米尔", "深海", "哥伦比亚", "莱塔尼亚", "叙拉古", "伊比利亚", "萨卡兹"];
+        // ==========================================
+        // 🌟 终极数据池 
+        // ==========================================
+        const gachaData = {
+            normal: [
+                { name: "炎", desc: "玩火的异格的下棋的幻神都到齐了，夕瓜大人那边还是没有消息吗？", tag: "普", icon: "./icon_0001.png", meme: "./meme_0001.jpg" },
+                { name: "维多利亚", desc: "纯粹的数值，人民的分队，锤多力量大", tag: "普", icon: "./icon_0002.png", meme: "./meme_0002.jpg" },
+                { name: "谢拉格", desc: "怪没进门凭什么扣我血？什么叫时间到了？！！", tag: "普", icon: "./icon_0003.png", meme: "./meme_0003.jpg" },
+                { name: "萨尔贡", desc: "佩佩快挖啊卡密能不能恢复神之手就看你的罗盘了！", tag: "普", icon: "./icon_0004.png", meme: "./meme_0004.jpg" },
+                { name: "拉特兰", desc: "我们意念合一———到我身边集合！！！", tag: "普", icon: "./icon_0005.png", meme: "./meme_0005.jpg" },
+                { name: "阿戈尔", desc: "小鱼吃大鱼吃小鱼吃大鱼吃小鱼吃不是鱼", tag: "普", icon: "./icon_0006.png", meme: "./meme_0006.jpg" },
+                { name: "叙拉古", desc: "道中别区求你了", tag: "普", icon: "./icon_0007.png", meme: "./meme_0007.jpg" },
+                { name: "卡西米尔", desc: "传下去，玛头输给了大帝", tag: "普", icon: "./icon_0008.png", meme: "./meme_0008.jpg" },
+                { name: "助力", desc: "前期神力", tag: "普", icon: "./icon_0009.png", meme: "./meme_0009.jpg" },
+                { name: "精准", desc: "每一个大C的梦想", tag: "普", icon: "./icon_0010.png", meme: "./meme_0010.jpg" },
+                { name: "奥术", desc: "你怎么会想到玩这个（doge", tag: "普", icon: "./icon_0011.png", meme: "./meme_0011.jpg" },
+                { name: "远见", desc: "给我圣葬！给我圣葬！！（超大声）", tag: "普", icon: "./icon_0012.png", meme: "./meme_0012.jpg" },
+                { name: "坚守", desc: "为斯卡蒂献上心脏！！", tag: "普", icon: "./icon_0013.png", meme: "./meme_0013.jpg" },
+                { name: "不屈", desc: "没有叠层一字排开，我只是希望D到你站起来", tag: "普", icon: "./icon_0014.png", meme: "./meme_0014.jpg" },
+                { name: "灵巧", desc: "攻速在哪里都是答案", tag: "普", icon: "./icon_0015.png", meme: "./meme_0015.jpg" },
+                { name: "迅捷", desc: "拿去刷萨尔贡", tag: "普", icon: "./icon_0016.png", meme: "./meme_0016.jpg" },
+                { name: "突袭", desc: "求你别跑……求你快跑！！", tag: "普", icon: "./icon_0017.png", meme: "./meme_0017.jpg" },
+                { name: "奇迹", desc: "拿去刷叙拉古", tag: "普", icon: "./icon_0018.png", meme: "./meme_0018.jpg" },
+                { name: "投资人", desc: "有时候金钱不是万能的", tag: "普", icon: "./icon_0019.png", meme: "./meme_0019.jpg" },
+                { name: "调和", desc: "不知道，我玩优等生的", tag: "普", icon: "./icon_0020.png", meme: "./meme_0020.jpg" },
+                { name: "独行", desc: "塞雷娅牛逼！！", tag: "普", icon: "./icon_0021.png", meme: "./meme_0021.jpg" },
+                { name: "绝技", desc: "我素挂件", tag: "普", icon: "./icon_0022.png", meme: "./meme_0022.jpg" },
+                { name: "协防干员", desc: "我也素挂件", tag: "普", icon: "./icon_0023.png", meme: "./meme_0023.jpg" }
+            ],
+            type999: [
+                { name: "炎", desc: "龙，可是帝王之征啊！", tag: "999", icon: "./icon_0001.png", meme: "./meme_9001.jpg" },
+                { name: "维多利亚", desc: "遗言就和我的金装灼燃烛煌蒸汽之心说去吧！！", tag: "999", icon: "./icon_0002.png", meme: "./meme_9002.jpg" },
+                { name: "谢拉格", desc: "犹如双开门冰箱一般的安全感，这回真是兜底的神了", tag: "999", icon: "./icon_0003.png", meme: "./meme_9003.jpg" },
+                { name: "萨尔贡", desc: "旋转，跳跃，我闭着眼~", tag: "999", icon: "./icon_0004.png", meme: "./meme_9004.jpg" },
+                { name: "拉特兰", desc: "只要……能到达……那个地方……", tag: "999", icon: "./icon_0005.png", meme: "./meme_9005.jpg" },
+                { name: "阿戈尔", desc: "夺少？真伤？？？？", tag: "999", icon: "./icon_0006.png", meme: "./meme_9006.jpg" },
+                { name: "叙拉古", desc: "BOSS死也没明白血槽怎么就空了。“人呢？？！！”", tag: "999", icon: "./icon_0007.png", meme: "./meme_9007.jpg" },
+                { name: "卡西米尔", desc: "下雨了。", tag: "999", icon: "./icon_0008.png", meme: "./meme_9008.jpg" },
+                { name: "助力", desc: "叠叠叠到厌倦", tag: "999", icon: "./icon_0009.png", meme: "./meme_9009.jpg" },
+                { name: "精准", desc: "左手高伤害，右手伤害高", tag: "999", icon: "./icon_0010.png", meme: "./meme_9010.jpg" },
+                { name: "奥术", desc: "法伤天花板", tag: "999", icon: "./icon_0011.png", meme: "./meme_9011.jpg" },
+                { name: "远见", desc: "来财！来财！来！！", tag: "999", icon: "./icon_0012.png", meme: "./meme_9012.jpg" },
+                { name: "坚守", desc: "牢·不·可·破", tag: "999", icon: "./icon_0013.png", meme: "./meme_9013.jpg" },
+                { name: "不屈", desc: "永远无法达到名为死亡的真实", tag: "999", icon: "./icon_0014.png", meme: "./meme_9014.jpg" },
+                { name: "灵巧", desc: "金酒之杯表示很赞", tag: "999", icon: "./icon_0015.png", meme: "./meme_9015.jpg" },
+                { name: "迅捷", desc: "平A当普攻……啊呸是大招当平A", tag: "999", icon: "./icon_0016.png", meme: "./meme_9016.jpg" },
+                { name: "突袭", desc: "知道你不是故意叠这么多的", tag: "999", icon: "./icon_0017.png", meme: "./meme_9017.jpg" },
+                { name: "奇迹", desc: "橱窗里的人换了一批又一批，我只是觉得好玩", tag: "999", icon: "./icon_0018.png", meme: "./meme_9018.jpg" },
+                { name: "投资人", desc: "有时候金钱确实是万能的", tag: "999", icon: "./icon_0019.png", meme: "./meme_9019.jpg" },
+                { name: "调和", desc: "开了", tag: "999", icon: "./icon_0020.png", meme: "./meme_9020.jpg" }
+            ],
+            special: [
+                { name: "电表倒转", desc: "请·输·入·文·本", tag: "特", icon: "./icon_special_1.png", meme: "./meme_special_1.jpg" },
+                { name: "砾志", desc: "如此砾志的、不屈的砾小姐，要面对的是石乐志的博士——乖，把药吃了", tag: "特", icon: "./icon_special_2.png", meme: "./meme_special_2.jpg" },
+                { name: "维维美", desc: "别看了，就是你———从头像到皮肤换上去就没摘下来过——吃我爆裂一大清早！", tag: "特", icon: "./icon_special_3.png", meme: "./meme_special_3.jpg" },
+                { name: "孤勇者", desc: "群友约打卫，你永远在作业、实验、汇报——为什么放下独行干员后，标志反而变灰了？", tag: "特", icon: "./icon_special_4.png", meme: "./meme_special_4.jpg" },
+                { name: "酒神", desc: "喝酒不玩舟，玩舟不喝酒。——你说我被举报了是什么意思？？", tag: "特", icon: "./icon_special_5.png", meme: "./meme_special_5.jpg" },
+                { name: "5/3", desc: "失之毫厘，谬之千里——卧槽！手滑了！！！！", tag: "特", icon: "./icon_special_6.png", meme: "./meme_special_6.jpg" },
+                { name: "外服", desc: "单方面宣布卫戍协议才是真正的wife，我为你不择手段的精神而喜悦——所以YJ常驻卫戍协议什么时候？", tag: "特", icon: "./icon_special_7.png", meme: "./meme_special_7.jpg" },
+                { name: "炎（9/6）", desc: "之前你叫我区，我不挑理，现在你该叫我什么？——两条区", tag: "特", icon: "./icon_special_8.png", meme: "./meme_special_8.jpg" }
+            ],
+            ur: [
+                { name: "凯尔希·思衡托", desc: "？？什么？！居然是占比0.1%的提前毕业欧皇！有这样的运气，你做什么都会成功的", tag: "皇", icon: "./icon_ur.png", meme: "./meme_ur.jpg" }
+            ]
+        };
+
+        // 🌟 关键修改 1：滚动池现在只包含普通词条的名称！
+        const normalNames = gachaData.normal.map(i => i.name);
         
         let isRolling = false;
-        const resultBox = document.getElementById('resultBox');
+        const resBox = document.getElementById('resultBox');
         const drawBtn = document.getElementById('drawBtn');
+        const typeHeader = document.getElementById('typeHeader');
+        const topTypeIcon = document.getElementById('topTypeIcon');
+        const badge999 = document.getElementById('badge999'); 
+        const bottomSection = document.getElementById('bottomSection');
+        const memeImage = document.getElementById('memeImage');
+        const descText = document.getElementById('descText');
 
-        // 核心抽取函数
-        function startRoll() {
-            if (isRolling) return; // 防止重复点击
-            isRolling = true;
-            
-            let rollCount = 0;
-            const maxRolls = 20; // 滚动次数
-            
-            // 播放滚动动画
-            const rollInterval = setInterval(() => {
-                const randomTrait = traits[Math.floor(Math.random() * traits.length)];
-                resultBox.innerText = randomTrait;
-                rollCount++;
-                
-                if (rollCount >= maxRolls) {
-                    clearInterval(rollInterval);
-                    // 最终结果
-                    const finalTrait = traits[Math.floor(Math.random() * traits.length)];
-                    resultBox.innerText = finalTrait;
-                    resultBox.style.color = "#00F2AF"; // 结果变青色
-                    isRolling = false;
-                } else {
-                    resultBox.style.color = "white"; // 滚动时保持白色
-                }
-            }, 50); // 每50毫秒变一次
+        function getRandomItem() {
+            const r = Math.random();
+            if (r < 0.001) return gachaData.ur[0];
+            if (r < 0.041) return gachaData.special[Math.floor(Math.random()*gachaData.special.length)];
+            if (r < 0.241) return gachaData.type999[Math.floor(Math.random()*gachaData.type999.length)];
+            return gachaData.normal[Math.floor(Math.random()*gachaData.normal.length)];
         }
 
-        // 绑定点击事件
+        function startRoll() {
+            if (isRolling) return;
+            isRolling = true;
+            typeHeader.style.opacity = "0";
+            bottomSection.style.opacity = "0";
+            badge999.style.opacity = "0"; 
+            resBox.style.color = "white";
+
+            const final = getRandomItem();
+            let count = 0;
+            const timer = setInterval(() => {
+                // 🌟 关键修改 2：只在屏幕上滚动显示普通词条
+                resBox.innerText = normalNames[Math.floor(Math.random() * normalNames.length)];
+                if (++count > 20) {
+                    clearInterval(timer);
+                    
+                    resBox.innerText = final.name;
+                    
+                    // 🌟 关键修改 3：动态拼接概率显示
+                    let probabilityText = "";
+                    if (final.tag === "皇") probabilityText = "（0.1%）";
+                    else if (final.tag === "999") probabilityText = "（20%）";
+                    else if (final.tag === "特") probabilityText = "（4%）";
+                    else probabilityText = "（75.9%）";
+                    
+                    descText.innerText = final.desc + " " + probabilityText;
+                    
+                    // 图片分配逻辑
+                    topTypeIcon.src = final.icon || "./default_icon.png";
+                    memeImage.src = final.meme || "./default_meme.jpg";
+                    
+                    // 颜色特效及 999 标签逻辑
+                    if (final.tag === "皇") {
+                        resBox.style.color = "#FFD700";
+                    } else if (final.tag === "999") {
+                        resBox.style.color = "#FF6347";
+                        badge999.style.opacity = "1"; 
+                    } else {
+                        resBox.style.color = "#00F2AF";
+                    }
+
+                    // 浮现动画
+                    typeHeader.style.opacity = "1";
+                    bottomSection.style.opacity = "1";
+                    isRolling = false;
+                }
+            }, 60);
+        }
+
+        function initSensors() {
+            const tips = document.querySelector('.tips');
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                tips.innerText = "iOS设备请先点击【抽取】解锁摇一摇";
+            } else {
+                window.addEventListener('devicemotion', shakeHandler, false);
+                tips.innerText = "直接摇动手机即可抽取！";
+            }
+        }
+
+        let lastX=0, lastY=0, lastZ=0;
+        function shakeHandler(e) {
+            const acc = e.accelerationIncludingGravity;
+            if (!acc) return;
+            let delta = Math.abs(acc.x - lastX) + Math.abs(acc.y - lastY);
+            if (delta > 25) startRoll();
+            lastX=acc.x; lastY=acc.y; lastZ=acc.z;
+        }
+
+        initSensors();
         drawBtn.addEventListener('click', () => {
-            requestDeviceMotionPermission(); // 尝试获取摇一摇权限（针对iOS）
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission().then(state => {
+                    if (state === 'granted') window.addEventListener('devicemotion', shakeHandler, false);
+                });
+            }
             startRoll();
         });
-
-        // 摇一摇功能检测
-        const SHAKE_THRESHOLD = 15; // 摇晃灵敏度阈值
-        let lastX = 0, lastY = 0, lastZ = 0;
-
-        function deviceMotionHandler(eventData) {
-            const acceleration = eventData.accelerationIncludingGravity;
-            if (!acceleration) return;
-
-            const deltaX = Math.abs(acceleration.x - lastX);
-            const deltaY = Math.abs(acceleration.y - lastY);
-            const deltaZ = Math.abs(acceleration.z - lastZ);
-
-            if (deltaX > SHAKE_THRESHOLD || deltaY > SHAKE_THRESHOLD || deltaZ > SHAKE_THRESHOLD) {
-                startRoll();
-            }
-
-            lastX = acceleration.x;
-            lastY = acceleration.y;
-            lastZ = acceleration.z;
-        }
-
-        // 处理 iOS 13+ 摇一摇权限问题
-        function requestDeviceMotionPermission() {
-            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                DeviceMotionEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            window.addEventListener('devicemotion', deviceMotionHandler, false);
-                        }
-                    })
-                    .catch(console.error);
-            } else {
-                // 非 iOS 13+ 设备直接监听
-                window.addEventListener('devicemotion', deviceMotionHandler, false);
-            }
-        }
     </script>
 </body>
 </html>
